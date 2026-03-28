@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCrypto } from '../context/CryptoContext'
-import { fetchVaultItems, deleteVaultItem } from '../lib/vault'
+import { fetchVaultItems, deleteVaultItem, insertVaultItem } from '../lib/vault'
 import { SkeletonCard } from '../components/Skeleton'
 import VaultUnlock from '../components/VaultUnlock'
 import VaultItemRow from '../components/VaultItemRow'
@@ -10,7 +10,7 @@ import AddItemModal from '../components/AddItemModal'
 
 export default function Vault() {
   const { user } = useAuth()
-  const { cryptoKey, decryptItem } = useCrypto()
+  const { cryptoKey, decryptItem, encryptItem } = useCrypto()
 
   const [items, setItems]           = useState([])      // [{ id, iv, ciphertext, created_at, decrypted }]
   const [loadingItems, setLoading]  = useState(true)
@@ -19,6 +19,9 @@ export default function Vault() {
   const [editingItem, setEditingItem] = useState(null)
   const [search, setSearch]         = useState('')
   const [unlockKey, setUnlockKey]   = useState(0)       // forces re-fetch after unlock
+  const [importResult, setImportResult] = useState(null) // { imported, skipped }
+  const [importing, setImporting]   = useState(false)
+  const fileInputRef                = useRef(null)
 
   const displayName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'there'
 
@@ -93,6 +96,82 @@ export default function Vault() {
   async function handleDelete(id) {
     await deleteVaultItem(id)
     setItems(prev => prev.filter(i => i.id !== id))
+  }
+
+  // ── Export vault as CSV (Chrome-compatible format) ──────────────────────────
+  function handleExport() {
+    const esc = v => `"${(v ?? '').replace(/"/g, '""')}"`
+    const rows = [
+      'name,url,username,password',
+      ...validItems.map(({ decrypted: { label, url, username, password } }) =>
+        [esc(label), esc(url), esc(username), esc(password)].join(',')
+      ),
+    ].join('\n')
+    const blob = new Blob([rows], { type: 'text/csv' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'passwordclaude-export.csv'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  // ── Import from CSV (Chrome/Firefox/Edge) or JSON ───────────────────────────
+  async function handleImport(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setImporting(true)
+    setImportResult(null)
+    try {
+      const text = await file.text()
+      let entries = []
+
+      if (file.name.endsWith('.json')) {
+        const parsed = JSON.parse(text)
+        entries = (Array.isArray(parsed) ? parsed : []).map(r => ({
+          label:    r.name ?? r.label ?? '',
+          url:      r.url ?? '',
+          username: r.username ?? r.login ?? r.email ?? '',
+          password: r.password ?? '',
+        }))
+      } else {
+        // CSV — skip header row, handle quoted fields
+        const lines = text.trim().split(/\r?\n/)
+        const start = lines[0].toLowerCase().includes('password') ? 1 : 0
+        entries = lines.slice(start).map(line => {
+          const fields = []
+          let cur = '', inQ = false
+          for (const ch of line) {
+            if (ch === '"') { inQ = !inQ }
+            else if (ch === ',' && !inQ) { fields.push(cur); cur = '' }
+            else { cur += ch }
+          }
+          fields.push(cur)
+          return {
+            label:    fields[0]?.trim() ?? '',
+            url:      fields[1]?.trim() ?? '',
+            username: fields[2]?.trim() ?? '',
+            password: fields[3]?.trim() ?? '',
+          }
+        })
+      }
+
+      let imported = 0, skipped = 0
+      for (const entry of entries) {
+        if (!entry.password) { skipped++; continue }
+        try {
+          const { iv, ciphertext } = await encryptItem(entry)
+          const row = await insertVaultItem(iv, ciphertext)
+          setItems(prev => [{ ...row, decrypted: entry }, ...prev])
+          imported++
+        } catch { skipped++ }
+      }
+      setImportResult({ imported, skipped })
+    } catch {
+      setImportResult({ imported: 0, skipped: -1 })
+    } finally {
+      setImporting(false)
+    }
   }
 
   // ── Locked state: key wiped from memory (e.g. page refresh) ────────────────
@@ -210,8 +289,49 @@ export default function Vault() {
           </div>
         )}
 
+        {/* ── Import / Export ─────────────────────────────────────────────── */}
+        <div className="mt-12 pt-6 border-t border-[#1a1a1a]">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs text-[#444444] tracking-widest uppercase">Data</span>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.json"
+                onChange={handleImport}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                className="text-xs tracking-widest uppercase text-[#555555] hover:text-white transition-colors duration-150 cursor-pointer border border-[#333333] hover:border-white px-3 py-1.5 disabled:opacity-40"
+              >
+                {importing ? 'Importing…' : 'Import →'}
+              </button>
+              <button
+                onClick={handleExport}
+                disabled={validItems.length === 0}
+                className="text-xs tracking-widest uppercase text-[#555555] hover:text-white transition-colors duration-150 cursor-pointer border border-[#333333] hover:border-white px-3 py-1.5 disabled:opacity-40"
+              >
+                Export →
+              </button>
+            </div>
+          </div>
+          {importResult && (
+            <p className="text-xs text-[#666666] font-light">
+              {importResult.skipped === -1
+                ? 'Import failed — invalid file format.'
+                : `Imported ${importResult.imported} password${importResult.imported !== 1 ? 's' : ''}${importResult.skipped > 0 ? `, skipped ${importResult.skipped}` : ''}.`
+              }
+            </p>
+          )}
+          <p className="text-xs text-[#333333] font-light mt-2">
+            Accepts CSV from Chrome, Firefox, Edge or a previous export.
+          </p>
+        </div>
+
         {/* ── Security footer ─────────────────────────────────────────────── */}
-        <div className="mt-16 pt-6 border-t border-[#1a1a1a] flex items-center justify-between">
+        <div className="mt-6 pt-6 border-t border-[#1a1a1a] flex items-center justify-between">
           <span className="text-xs text-[#444444] tracking-widest uppercase">Security</span>
           <Link
             to="/change-master-password"

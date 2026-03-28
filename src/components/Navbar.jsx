@@ -6,7 +6,6 @@ import { useCrypto } from '../context/CryptoContext'
 const publicLinks = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
-  { to: '/blog', label: 'Blog' },
 ]
 
 export default function Navbar() {
@@ -14,9 +13,6 @@ export default function Navbar() {
   const { lockVault } = useCrypto()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-
-  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL
-  const isAdmin = user?.email === adminEmail
 
   async function handleSignOut() {
     setMenuOpen(false)
@@ -36,10 +32,7 @@ export default function Navbar() {
   const allLinks = [
     ...publicLinks,
     ...(user
-      ? [
-          { to: '/vault', label: 'Vault' },
-          ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
-        ]
+      ? [{ to: '/vault', label: 'Vault' }]
       : [{ to: '/login', label: 'Login' }, { to: '/signup', label: 'Sign Up' }]
     ),
   ]
