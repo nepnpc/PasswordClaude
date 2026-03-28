@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 const values = [
   {
@@ -26,6 +26,42 @@ const steps = [
 ]
 
 export default function About() {
+  const [name, setName]       = useState('')
+  const [email, setEmail]     = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [status, setStatus]   = useState(null) // 'success' | 'error'
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setLoading(true)
+    setStatus(null)
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
+          name,
+          email,
+          message,
+          subject: `PasswordClaude — message from ${name}`,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setStatus('success')
+        setName(''); setEmail(''); setMessage('')
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setStatus('error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <main className="max-w-5xl mx-auto px-6 pt-32 pb-24">
 
@@ -75,6 +111,7 @@ export default function About() {
         <h2 className="text-4xl font-light tracking-tight text-white mb-12">Get in Touch</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+
           {/* Left: info */}
           <div className="flex flex-col gap-6">
             <p className="text-sm text-[#666666] font-light leading-relaxed">
@@ -82,12 +119,12 @@ export default function About() {
             </p>
             <div className="flex flex-col gap-4 pt-2">
               <div className="border-b border-[#1f1f1f] pb-4">
-                <p className="text-xs tracking-widest uppercase text-[#444444] mb-1">General</p>
-                <p className="text-sm text-white font-light">hello@passwordclaude.com</p>
+                <p className="text-xs tracking-widest uppercase text-[#444444] mb-1">Email</p>
+                <p className="text-sm text-white font-light">subwrn@gmail.com</p>
               </div>
               <div className="border-b border-[#1f1f1f] pb-4">
-                <p className="text-xs tracking-widest uppercase text-[#444444] mb-1">Security</p>
-                <p className="text-sm text-white font-light">security@passwordclaude.com</p>
+                <p className="text-xs tracking-widest uppercase text-[#444444] mb-1">Phone</p>
+                <p className="text-sm text-white font-light">+977 9703901454</p>
               </div>
               <div>
                 <p className="text-xs tracking-widest uppercase text-[#444444] mb-1">Response Time</p>
@@ -97,13 +134,28 @@ export default function About() {
           </div>
 
           {/* Right: form */}
-          <form className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+            {status === 'success' && (
+              <div className="border border-[#333333] px-4 py-3">
+                <p className="text-xs text-white font-light">Message sent. We'll get back to you soon.</p>
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="border border-white px-4 py-3">
+                <p className="text-xs text-white font-light">Failed to send. Please try emailing directly.</p>
+              </div>
+            )}
+
             <div className="flex flex-col gap-1.5">
               <label className="text-xs tracking-widest uppercase text-[#666666]">Name</label>
               <div className="border border-[#333333] focus-within:border-2 focus-within:border-white transition-[border-color,border-width] duration-150">
                 <input
                   type="text"
                   placeholder="Your Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  required
                   className="w-full bg-black text-white text-sm px-4 py-3 outline-none placeholder-[#444444]"
                 />
               </div>
@@ -115,6 +167,9 @@ export default function About() {
                 <input
                   type="email"
                   placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
                   className="w-full bg-black text-white text-sm px-4 py-3 outline-none placeholder-[#444444]"
                 />
               </div>
@@ -126,6 +181,9 @@ export default function About() {
                 <textarea
                   rows={5}
                   placeholder="Your message..."
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  required
                   className="w-full bg-black text-white text-sm px-4 py-3 outline-none placeholder-[#444444] resize-none"
                 />
               </div>
@@ -133,9 +191,10 @@ export default function About() {
 
             <button
               type="submit"
-              className="mt-2 border border-white text-white text-xs tracking-widest uppercase py-3.5 px-6 hover:bg-white hover:text-black transition-colors duration-150 cursor-pointer"
+              disabled={loading}
+              className="mt-2 border border-white text-white text-xs tracking-widest uppercase py-3.5 px-6 hover:bg-white hover:text-black transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Send Message
+              {loading ? 'Sending…' : 'Send Message'}
             </button>
           </form>
         </div>
