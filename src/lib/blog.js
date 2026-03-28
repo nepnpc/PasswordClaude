@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 export async function fetchPublishedPosts() {
   const { data, error } = await supabase
     .from('blog_posts')
-    .select('id, slug, category, title, excerpt, published_at')
+    .select('id, slug, category, title, excerpt, content, published_at')
     .eq('published', true)
     .order('published_at', { ascending: false })
   if (error) throw error
