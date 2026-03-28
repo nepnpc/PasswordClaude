@@ -13,8 +13,8 @@ const features = [
   },
   {
     number: '03',
-    title: 'Offline-First Vault',
-    body: 'Your vault is always available, with or without an internet connection. Sync happens silently in the background when connectivity returns.',
+    title: 'Encryption Chain',
+    body: 'Master Password + Salt → PBKDF2-SHA256 (600k iterations) → AES-GCM-256 key → encrypts your vault. Every item gets a unique random IV. Tampering is cryptographically detected.',
   },
 ]
 
