@@ -3,9 +3,10 @@ import { SkeletonCard } from '../components/Skeleton'
 import { fetchPublishedPosts } from '../lib/blog'
 
 export default function Blog() {
-  const [posts, setPosts]   = useState([])
+  const [posts, setPosts]     = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
+  const [error, setError]     = useState(null)
+  const [expandedId, setExpandedId] = useState(null)
 
   useEffect(() => {
     fetchPublishedPosts()
@@ -38,12 +39,10 @@ export default function Blog() {
         </div>
       )}
 
-      {/* Posts grid */}
+      {/* Posts */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#333333]">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
+        <div className="flex flex-col gap-px bg-[#222222]">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : posts.length === 0 && !error ? (
         <div className="border border-[#1a1a1a] px-8 py-20 text-center">
@@ -51,32 +50,62 @@ export default function Blog() {
           <p className="text-sm text-[#888888] font-light">Check back soon.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#333333]">
-          {posts.map(({ id, category, title, excerpt, published_at }) => (
-            <article
-              key={id}
-              className="bg-black p-8 flex flex-col gap-4 group border border-transparent hover:border-[#333333] active:border-white transition-colors duration-150 cursor-pointer"
-            >
-              <span className="text-xs tracking-widest uppercase text-[#666666]">{category}</span>
+        <div className="flex flex-col gap-px bg-[#222222]">
+          {posts.map(post => {
+            const isExpanded = expandedId === post.id
+            return (
+              <article key={post.id} className="bg-black">
 
-              <h2 className="text-base font-medium text-white tracking-tight leading-snug group-hover:text-[#cccccc] transition-colors duration-150">
-                {title}
-              </h2>
+                {/* Card header — always visible */}
+                <div className="p-8 flex flex-col gap-4">
+                  <span className="text-xs tracking-widest uppercase text-[#666666]">{post.category}</span>
 
-              <p className="text-sm text-[#888888] font-light leading-relaxed flex-1">{excerpt}</p>
+                  <h2 className="text-base font-medium text-white tracking-tight leading-snug">
+                    {post.title}
+                  </h2>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#1a1a1a]">
-                <span className="text-xs text-[#555555]">
-                  {published_at
-                    ? new Date(published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                    : ''}
-                </span>
-                <span className="text-xs tracking-widest uppercase text-[#666666] group-hover:text-white transition-colors duration-150">
-                  Read →
-                </span>
-              </div>
-            </article>
-          ))}
+                  <p className="text-sm text-[#888888] font-light leading-relaxed">{post.excerpt}</p>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#1a1a1a]">
+                    <span className="text-xs text-[#555555]">
+                      {post.published_at
+                        ? new Date(post.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : ''}
+                    </span>
+                    <button
+                      onClick={() => setExpandedId(isExpanded ? null : post.id)}
+                      className="text-xs tracking-widest uppercase border border-[#333333] px-3 py-1.5 text-[#888888] hover:border-white hover:text-white transition-colors duration-150 cursor-pointer"
+                    >
+                      {isExpanded ? '← Minimize' : 'Read →'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                  <div className="border-t border-[#1a1a1a] px-8 pb-10 pt-8">
+                    {post.content ? (
+                      <div className="prose-custom">
+                        {post.content.split('\n').map((line, i) => (
+                          line.trim() === ''
+                            ? <div key={i} className="h-4" />
+                            : <p key={i} className="text-sm text-[#cccccc] font-light leading-relaxed">{line}</p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#555555] font-light italic">No content yet.</p>
+                    )}
+                    <button
+                      onClick={() => setExpandedId(null)}
+                      className="mt-8 text-xs tracking-widest uppercase text-[#555555] hover:text-white transition-colors duration-150 cursor-pointer border-b border-transparent hover:border-[#555555]"
+                    >
+                      ← Minimize
+                    </button>
+                  </div>
+                )}
+              </article>
+            )
+          })}
         </div>
       )}
     </main>
