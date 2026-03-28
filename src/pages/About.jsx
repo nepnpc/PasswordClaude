@@ -36,12 +36,24 @@ export default function About() {
     e.preventDefault()
     setLoading(true)
     setStatus(null)
+
+    const key = import.meta.env.VITE_WEB3FORMS_KEY
+
+    // No API key configured — open mailto as reliable fallback
+    if (!key) {
+      const subject = encodeURIComponent(`PasswordClaude — message from ${name}`)
+      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)
+      window.location.href = `mailto:subwrn@gmail.com?subject=${subject}&body=${body}`
+      setLoading(false)
+      return
+    }
+
     try {
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
+          access_key: key,
           name,
           email,
           message,
