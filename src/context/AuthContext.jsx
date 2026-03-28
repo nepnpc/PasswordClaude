@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
       // After email verification the user lands at /#access_token=...&type=signup.
       // Redirect them to login so they can enter their master password and set up the vault.
       if (event === 'SIGNED_IN' && window.location.hash.includes('type=signup')) {
-        window.location.replace('/login')
+        window.location.replace('/vault')
       }
     })
 
