@@ -6,6 +6,7 @@ import { useCrypto } from '../context/CryptoContext'
 const publicLinks = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
+  { to: '/blog', label: 'Blog' },
 ]
 
 export default function Navbar() {
