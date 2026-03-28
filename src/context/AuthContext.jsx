@@ -13,8 +13,13 @@ export function AuthProvider({ children }) {
     })
 
     // Keep in sync with Supabase auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      // After email verification the user lands at /#access_token=...&type=signup.
+      // Redirect them to login so they can enter their master password and set up the vault.
+      if (event === 'SIGNED_IN' && window.location.hash.includes('type=signup')) {
+        window.location.replace('/login')
+      }
     })
 
     return () => subscription.unsubscribe()

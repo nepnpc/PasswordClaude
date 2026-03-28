@@ -61,7 +61,7 @@ export default function Signup() {
             <p className="text-xs tracking-widest uppercase text-[#666666]">Check your inbox</p>
             <h2 className="text-2xl font-light tracking-tight text-white">Confirm your email</h2>
             <p className="text-sm text-[#666666] font-light leading-relaxed">
-              We sent a confirmation link to <span className="text-white">{email}</span>. Click it to activate your account, then log in.
+              We sent a confirmation link to <span className="text-white">{email}</span>. Click it to verify your email — you'll be brought back here to log in and set up your vault.
             </p>
             <Link
               to="/login"
