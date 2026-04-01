@@ -40,7 +40,7 @@ export default function Home() {
         <p className="text-[#888888] text-lg font-light leading-relaxed max-w-xl mb-10">
           PasswordClaude is a minimal, zero-knowledge password manager built for people who take privacy seriously. No bloat. No colour. No compromise.
         </p>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <Link
             to="/signup"
             className="border border-white text-white text-xs tracking-widest uppercase py-3.5 px-8 hover:bg-white hover:text-black transition-colors duration-150"
@@ -48,10 +48,10 @@ export default function Home() {
             Get Started
           </Link>
           <Link
-            to="/about"
-            className="text-xs tracking-widest uppercase text-[#666666] hover:text-white transition-colors duration-150"
+            to="/download"
+            className="border border-[#333333] text-[#888888] text-xs tracking-widest uppercase py-3.5 px-8 hover:border-white hover:text-white transition-colors duration-150"
           >
-            Learn More →
+            Download for Windows →
           </Link>
         </div>
       </section>
