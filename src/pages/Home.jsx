@@ -22,7 +22,7 @@ const stats = [
   { value: 'AES-256', label: 'Encryption Standard' },
   { value: 'Zero', label: 'Knowledge Architecture' },
   { value: '100%', label: 'Open Source' },
-  { value: 'Cross', label: 'Platform Support' },
+  { value: 'Web · Win · Android', label: 'Platform Support' },
 ]
 
 export default function Home() {
@@ -51,7 +51,7 @@ export default function Home() {
             to="/download"
             className="border border-[#333333] text-[#888888] text-xs tracking-widest uppercase py-3.5 px-8 hover:border-white hover:text-white transition-colors duration-150"
           >
-            Download for Windows →
+            Download for Windows & Android →
           </Link>
         </div>
       </section>
