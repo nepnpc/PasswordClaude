@@ -45,9 +45,10 @@ export default function Navbar() {
         <NavLink
           to="/"
           onClick={() => setMenuOpen(false)}
-          className="text-sm font-semibold tracking-widest uppercase text-white shrink-0 hover:text-[#cccccc] transition-colors duration-150"
+          className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity duration-150"
         >
-          PasswordClaude
+          <img src="/logo.png" alt="PasswordClaude" className="h-8 w-8 object-contain" />
+          <span className="text-sm font-semibold tracking-widest uppercase text-white">PasswordClaude</span>
         </NavLink>
 
         {/* Desktop links */}
