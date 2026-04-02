@@ -117,6 +117,91 @@ export default function About() {
         </div>
       </section>
 
+      {/* Creator */}
+      <section className="border-b border-[#333333] pb-20 mb-20">
+        <p className="text-xs tracking-widest uppercase text-[#666666] mb-12">Creator</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+
+          {/* Bio */}
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-3xl font-light tracking-tight text-white mb-2">Subarna Katwal</h2>
+              <p className="text-xs tracking-widest uppercase text-[#555555]">Developer · Nepal</p>
+            </div>
+            <p className="text-sm text-[#666666] font-light leading-relaxed">
+              PasswordClaude was designed and built by Subarna Katwal — a developer focused on privacy-first software.
+              Every line of code was written with the conviction that a password manager should never be trusted blindly;
+              it should be provably secure.
+            </p>
+            <p className="text-sm text-[#666666] font-light leading-relaxed">
+              The project is entirely open source. The cryptographic implementation uses only native browser APIs
+              — no third-party crypto libraries — so the security surface is as small as possible.
+            </p>
+
+            {/* Social links */}
+            <div className="flex flex-col gap-3 pt-2">
+              {[
+                { label: 'GitHub', href: 'https://github.com/subarnakatwal123' },
+                { label: 'LinkedIn', href: 'https://www.linkedin.com/in/nepnpc/' },
+                { label: 'Instagram', href: 'https://www.instagram.com/nepnpc/' },
+                { label: 'Facebook', href: 'https://www.facebook.com/nepnpc/' },
+                { label: 'Email', href: 'mailto:subwrn@gmail.com', display: 'subwrn@gmail.com' },
+              ].map(({ label, href, display }) => (
+                <div key={label} className="border-b border-[#1a1a1a] pb-3 flex items-center justify-between">
+                  <p className="text-xs tracking-widest uppercase text-[#444444]">{label}</p>
+                  <a
+                    href={href}
+                    target={href.startsWith('mailto') ? undefined : '_blank'}
+                    rel="noopener noreferrer"
+                    className="text-xs text-[#666666] hover:text-white transition-colors duration-150 border-b border-transparent hover:border-[#555555] pb-px"
+                  >
+                    {display || href.replace('https://', '').replace('mailto:', '')}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tech breakdown */}
+          <div className="flex flex-col gap-6">
+            <p className="text-xs tracking-widest uppercase text-[#444444] mb-2">How It Was Built</p>
+
+            {[
+              {
+                title: 'Frontend Stack',
+                body: 'Built with React 18 (JSX) and Vite as the build tool for near-instant HMR. Styled with Tailwind CSS v4 via the official Vite plugin — no config file required. Routing handled by React Router v6 with BrowserRouter.',
+              },
+              {
+                title: 'Backend & Auth',
+                body: 'Supabase provides the Postgres database, Row-Level Security (RLS) policies, and authentication. Every database row is scoped to auth.uid() — no server-side code can access another user\'s data.',
+              },
+              {
+                title: 'Key Derivation — PBKDF2',
+                body: 'The master password is never stored or transmitted. It is fed into PBKDF2-SHA-256 with a random 16-byte salt and 600,000 iterations via the native Web Crypto API, producing a non-extractable AES-GCM-256 key that lives only in React state.',
+              },
+              {
+                title: 'Encryption — AES-GCM-256',
+                body: 'Each vault item is serialised as JSON {label, url, username, password} and encrypted with a fresh 12-byte random IV using AES-GCM. The IV and ciphertext are base64-encoded and stored in Supabase. GCM\'s authentication tag means any tampering is detected on decryption.',
+              },
+              {
+                title: 'Zero-Knowledge Verification',
+                body: 'On first setup, the string "passwordclaude-verify-v1" is encrypted with the derived key and saved as profiles.key_check. On every login the app attempts to decrypt this token — if it succeeds, the password is correct and the key is valid, without ever comparing a stored password.',
+              },
+              {
+                title: 'Password Reset — Safe Re-keying',
+                body: 'Resetting the master password wipes the old profile row and all vault items before deriving a new key. This prevents a stale salt from making the new password permanently fail verification — a subtle but critical edge case.',
+              },
+            ].map(({ title, body }) => (
+              <div key={title} className="border-l border-[#222222] pl-5 flex flex-col gap-1.5">
+                <h3 className="text-xs font-medium text-white tracking-tight">{title}</h3>
+                <p className="text-xs text-[#555555] font-light leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
       {/* Contact */}
       <section id="contact">
         <p className="text-xs tracking-widest uppercase text-[#666666] mb-6">Contact</p>
