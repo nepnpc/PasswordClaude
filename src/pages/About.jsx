@@ -141,7 +141,7 @@ export default function About() {
             {/* Social links */}
             <div className="flex flex-col gap-3 pt-2">
               {[
-                { label: 'GitHub', href: 'https://github.com/subarnakatwal123' },
+                { label: 'GitHub', href: 'https://github.com/nepnpc' },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/in/nepnpc/' },
                 { label: 'Instagram', href: 'https://www.instagram.com/nepnpc/' },
                 { label: 'Facebook', href: 'https://www.facebook.com/nepnpc/' },
