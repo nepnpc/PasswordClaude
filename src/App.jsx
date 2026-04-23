@@ -9,7 +9,6 @@ import About from './pages/About'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Blog from './pages/Blog'
-import Download from './pages/Download'
 import Vault from './pages/Vault'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -25,8 +24,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/download" element={<Download />} />
-          <Route path="/login" element={<Login />} />
+<Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

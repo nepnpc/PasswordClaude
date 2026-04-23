@@ -47,12 +47,6 @@ export default function Home() {
           >
             Get Started
           </Link>
-          <Link
-            to="/download"
-            className="border border-[#333333] text-[#888888] text-xs tracking-widest uppercase py-3.5 px-8 hover:border-white hover:text-white transition-colors duration-150"
-          >
-            Download for Windows & Android →
-          </Link>
         </div>
       </section>
 

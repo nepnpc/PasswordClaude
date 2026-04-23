@@ -53,7 +53,6 @@ const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
   { to: '/blog', label: 'Blog' },
-  { to: '/download', label: 'Download' },
 ]
 
 export default function Footer() {
